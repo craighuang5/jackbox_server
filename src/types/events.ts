@@ -5,6 +5,12 @@ let serverEvents = {
   "connected": "connected",
   "gameStart": "gameStart",
   "error": "error",
+  "wordSelectStart": "wordSelectStart",
+  "drawStart": "drawStart",
+  "captionStart": "captionStart",
+  "voteStart": "voteStart",
+  "playersOutStart": "playersOutStart",
+  "winnerStart": "winnerStart",
 }
 
 // events emitted by the client that the server listens for
@@ -13,6 +19,7 @@ let clientEvents = {
   "joinGame": "joinGame",
   "startGame": "startGame",
   "leaveGame": "leaveGame",
+  "startWordSelect": "startWordSelect",
 }
 
 export {

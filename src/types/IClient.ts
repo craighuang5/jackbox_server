@@ -18,3 +18,7 @@ export interface ILeaveGame {
   username: string;
   gameid: string;
 }
+
+export interface IStartWordSelect {
+  gameid: string;
+}

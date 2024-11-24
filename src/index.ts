@@ -36,6 +36,9 @@ io.on("connection", (socket) => {
 
   // Leave game
   socket.on(clientEvents.leaveGame, (request: IClient.ILeaveGame) => EventHandler.leaveGame(io, socket, request))
+
+  // Start word select
+  socket.on(clientEvents.startWordSelect, (request: IClient.IStartWordSelect) => EventHandler.startWordSelect(io, socket, request))
 });
 
 httpServer.listen(port);

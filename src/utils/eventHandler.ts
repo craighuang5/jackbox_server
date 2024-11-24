@@ -92,5 +92,14 @@ export default class EventHandler {
       gameType: room?.getGameType()
     } as IServer.IRoomUpdate)
   }
+
+  static startWordSelect(io: Server, socket: Socket, request: IClient.IStartWordSelect) {
+    try {
+      io.in(request.gameid).emit(serverEvents.wordSelectStart)
+    } catch (e: any) {
+      print(e.message)
+      socket.emit(serverEvents.error, e.message)
+    }
+  }
 }
 
