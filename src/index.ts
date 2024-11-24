@@ -7,6 +7,7 @@ import * as IClient from "./types/IClient";
 import * as IServer from "./types/IServer";
 import { clientEvents } from './types/events';
 import EventHandler from "./utils/eventHandler";
+import { generatePrompt } from './utils/promptGenerator';
 
 const app: Express = express(); // create express app
 const httpServer = createServer(app); // create http server
@@ -18,8 +19,22 @@ const io = new Server(httpServer, { // create socket server
   }
 });
 
+app.use(express.json()); // Middleware to parse JSON bodies
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
+});
+
+// Route to handle prompt generation
+app.post('/generate-prompt', async (req: Request, res: Response) => {
+  try {
+    const { prompt } = req.body;
+    const responseText = await generatePrompt(prompt);
+    res.send({ response: responseText });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    res.status(500).send({ error: errorMessage });
+  }
 });
 
 io.on("connection", (socket) => {
