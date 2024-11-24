@@ -39,6 +39,9 @@ io.on("connection", (socket) => {
 
   // Start word select
   socket.on(clientEvents.startWordSelect, (request: IClient.IStartWordSelect) => EventHandler.startWordSelect(io, socket, request))
+
+  // Handle submit words
+  socket.on(clientEvents.submitWords, (request: IClient.ISubmitWords) => EventHandler.handleSubmitWords(io, socket, request))
 });
 
 httpServer.listen(port);

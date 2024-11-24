@@ -21,6 +21,7 @@ let clientEvents = {
   "startGame": "startGame",
   "leaveGame": "leaveGame",
   "startWordSelect": "startWordSelect",
+  "submitWords": "submitWords",
 }
 
 export {

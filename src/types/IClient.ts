@@ -22,3 +22,10 @@ export interface ILeaveGame {
 export interface IStartWordSelect {
   gameid: string;
 }
+
+export interface ISubmitWords {
+  gameid: string;
+  username: string;
+  selectedNouns: string[];
+  selectedVerbs: string[];
+}

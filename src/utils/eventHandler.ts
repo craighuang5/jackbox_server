@@ -103,5 +103,17 @@ export default class EventHandler {
       socket.emit(serverEvents.error, e.message)
     }
   }
+
+  static handleSubmitWords(io: Server, socket: Socket, request: IClient.ISubmitWords) {
+    try {
+      console.log('handleSubmitWords called');
+      const { gameid, username, selectedNouns, selectedVerbs } = request;
+      console.log(`Received selected words from ${username} for game ${gameid}:`, selectedNouns, selectedVerbs);
+      // Generate prompts with Gemini
+    } catch (e: any) {
+      print(e.message);
+      socket.emit(serverEvents.error, e.message);
+    }
+  }
 }
 
