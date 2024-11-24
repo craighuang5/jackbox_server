@@ -11,6 +11,7 @@ let serverEvents = {
   "voteStart": "voteStart",
   "playersOutStart": "playersOutStart",
   "winnerStart": "winnerStart",
+  "timerUpdate": "timerUpdate",
 }
 
 // events emitted by the client that the server listens for

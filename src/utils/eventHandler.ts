@@ -7,6 +7,7 @@ import { serverEvents, clientEvents } from '../types/events';
 import * as Errors from '../types/errors';
 import 'dotenv/config'
 import { server } from "typescript";
+import GameLogic from './gameLogic';
 
 let roomid = 1;
 const rooms = new Rooms();
@@ -95,7 +96,8 @@ export default class EventHandler {
 
   static startWordSelect(io: Server, socket: Socket, request: IClient.IStartWordSelect) {
     try {
-      io.in(request.gameid).emit(serverEvents.wordSelectStart)
+      const gameLogic = new GameLogic(io, request.gameid);
+      gameLogic.startWordSelection();
     } catch (e: any) {
       print(e.message)
       socket.emit(serverEvents.error, e.message)

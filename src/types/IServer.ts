@@ -5,3 +5,8 @@ export interface IRoomUpdate {
   gameType: string;
   players: string[];
 }
+
+export interface ITimerUpdate {
+  gameid: string;
+  time: number;
+}
