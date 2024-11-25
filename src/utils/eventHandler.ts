@@ -1,7 +1,7 @@
 import { Socket, Server } from "socket.io";
 import * as IClient from "../types/IClient";
 import * as IServer from "../types/IServer";
-import { Rooms, Room } from "../utils/rooms";
+import { Rooms, Room, Player } from "../utils/rooms";
 import { print } from "../utils/common";
 import { serverEvents, clientEvents } from '../types/events';
 import * as Errors from '../types/errors';
@@ -22,9 +22,10 @@ export default class EventHandler {
       socket.join(roomid + '');
 
       // update rooms object
-      const room = rooms.addRoomWithID(roomid + '', request.gameType);
+      const room = rooms.addRoomWithID(roomid + '', request.gameType, request.rounds);
       room?.addPlayer(request.username);
       room?.setGameType(request.gameType);
+      room?.setTotalRounds(request.rounds);
 
       socket.emit(serverEvents.connected) // inform client of successful connection
       if (room) this.emitRoomUpdate(io, room) // send initial room update
@@ -63,9 +64,9 @@ export default class EventHandler {
     }
   }
 
-  static startGame(io: Server, socket: Socket, request: IClient.IStartGame) {
+  static startTutorial(io: Server, socket: Socket, request: IClient.IStartTutorial) {
     try {
-      io.in(request.gameid).emit(serverEvents.gameStart)
+      io.in(request.gameid).emit(serverEvents.tutorialStart)
     } catch (e: any) {
       print(e.message)
       socket.emit(serverEvents.error, e.message)
@@ -90,26 +91,59 @@ export default class EventHandler {
     io.in(room.getID()).emit(serverEvents.roomUpdate, {
       gameid: room.getID() + '',
       players: room?.getPlayers().map(player => player.getUsername()),
-      gameType: room?.getGameType()
+      gameType: room?.getGameType(),
+      totalRounds: room?.getTotalRounds(),
+      currentRound: room?.getCurrentRound(),
     } as IServer.IRoomUpdate)
   }
-
-  static startWordSelect(io: Server, socket: Socket, request: IClient.IStartWordSelect) {
+  static startRound(io: Server, socket: Socket, request: IClient.IStartRound) {
     try {
-      const gameLogic = new GameLogic(io, request.gameid);
-      gameLogic.startWordSelection();
+      // Check if the game has ended (current round > total rounds)
+      const room = rooms.getRoom(request.gameid)
+      if (!room) throw Errors.INVALID_GAMEID;
+      if (room.getCurrentRound() > room.getTotalRounds()) {
+        console.log(`Game ${request.gameid} has ended. Emitting winners.`);
+        // Game has ended, emit winners to all players in the room
+        io.in(request.gameid).emit(serverEvents.winnerStart, {
+          gameid: request.gameid,
+          players: room.getPlayers().map((player) => ({
+            username: player.getUsername(),
+            score: player.getScore(),
+          })),
+        });
+        return;
+      }
+      // Game hasn't ended, start the round
+      console.log(`Game ${room.getID()} Round ${room.getCurrentRound()} out of ${room.getTotalRounds()}`);
+      const g = new GameLogic(io, request.gameid);
+      g.startRound();
+      // Round ended, increment current round and emit to clients
+      room.setCurrentRound(room.getCurrentRound() + 1);
+      this.emitRoomUpdate(io, room);
     } catch (e: any) {
       print(e.message)
       socket.emit(serverEvents.error, e.message)
     }
   }
 
-  static handleSubmitWords(io: Server, socket: Socket, request: IClient.ISubmitWords) {
+  static handleSubmitWordSelection(io: Server, socket: Socket, request: IClient.ISubmitWordSelection) {
     try {
-      console.log('handleSubmitWords called');
       const { gameid, username, selectedNouns, selectedVerbs } = request;
+      console.log('**********************************************************************************************')
       console.log(`Received selected words from ${username} for game ${gameid}:`, selectedNouns, selectedVerbs);
-      // Generate prompts with Gemini
+      // Store the words for the user
+      const room = rooms.getRoom(request.gameid)
+      if (!room) throw Errors.INVALID_GAMEID;
+      const p = room.getPlayerByUsername(request.username)
+      if (!p) throw Errors.USER_NOT_DEFINED;
+      p.setNouns(request.selectedNouns)
+      p.setVerbs(request.selectedVerbs)
+      const n = p.getNouns()
+      const v = p.getVerbs()
+      console.log(`saved words for player ${p.getUsername()}:\nNouns: ${n.length > 0 ? n.join(", ") : ""}\nVerbs: ${v.length > 0 ? v.join(", ") : ""}`
+      )
+      console.log('**********************************************************************************************')
+
     } catch (e: any) {
       print(e.message);
       socket.emit(serverEvents.error, e.message);

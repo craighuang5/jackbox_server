@@ -3,13 +3,13 @@ let serverEvents = {
   "roomUpdate": "roomUpdate",
   "usernameTaken": "usernameTaken",
   "connected": "connected",
-  "gameStart": "gameStart",
+  "tutorialStart": "tutorialStart",
   "error": "error",
   "wordSelectStart": "wordSelectStart",
   "drawStart": "drawStart",
   "captionStart": "captionStart",
   "voteStart": "voteStart",
-  "playersOutStart": "playersOutStart",
+  "scoreStart": "scoreStart",
   "winnerStart": "winnerStart",
   "timerUpdate": "timerUpdate",
 }
@@ -18,10 +18,10 @@ let serverEvents = {
 let clientEvents = {
   "createGame": "createGame",
   "joinGame": "joinGame",
-  "startGame": "startGame",
+  "startTutorial": "startTutorial",
   "leaveGame": "leaveGame",
-  "startWordSelect": "startWordSelect",
-  "submitWords": "submitWords",
+  "startRound": "startRound",
+  "submitWordSelection": "submitWordSelection",
 }
 
 export {

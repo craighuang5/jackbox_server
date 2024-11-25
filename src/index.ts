@@ -46,17 +46,16 @@ io.on("connection", (socket) => {
   // Join game
   socket.on(clientEvents.joinGame, (request: IClient.IJoinGame) => EventHandler.joinGame(io, socket, request))
 
-  // Start game
-  socket.on(clientEvents.startGame, (request: IClient.IStartGame) => EventHandler.startGame(io, socket, request))
-
+  // Start tutorial
+  socket.on(clientEvents.startTutorial, (request: IClient.IStartTutorial) => EventHandler.startTutorial(io, socket, request))
   // Leave game
   socket.on(clientEvents.leaveGame, (request: IClient.ILeaveGame) => EventHandler.leaveGame(io, socket, request))
 
-  // Start word select
-  socket.on(clientEvents.startWordSelect, (request: IClient.IStartWordSelect) => EventHandler.startWordSelect(io, socket, request))
+  // Start round
+  socket.on(clientEvents.startRound, (request: IClient.IStartRound) => EventHandler.startRound(io, socket, request))
 
   // Handle submit words
-  socket.on(clientEvents.submitWords, (request: IClient.ISubmitWords) => EventHandler.handleSubmitWords(io, socket, request))
+  socket.on(clientEvents.submitWordSelection, (request: IClient.ISubmitWordSelection) => EventHandler.handleSubmitWordSelection(io, socket, request))
 });
 
 httpServer.listen(port);
