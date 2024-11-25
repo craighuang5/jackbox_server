@@ -1,3 +1,5 @@
+import Player from './player';
+
 export class Rooms {
   private rooms: Room[];
 
@@ -29,7 +31,7 @@ export class Rooms {
 
 export class Room {
   private id: string;
-  private players: string[];
+  private players: Player[];
   private gameType: string;
 
   constructor(id: string, gameType: string) {
@@ -38,12 +40,13 @@ export class Room {
     this.gameType = gameType;
   }
 
-  addPlayer(player: string) {
+  addPlayer(username: string) {
+    const player = new Player(username)
     this.players.push(player);
   }
 
-  removePlayer(player: string) {
-    this.players = this.players.filter((p) => p !== player);
+  removePlayer(username: string) {
+    this.players = this.players.filter((p) => p.getUsername() !== username);
   }
 
   getPlayers() {
@@ -51,7 +54,7 @@ export class Room {
   }
 
   hasUsername(username: string) {
-    return this.players.includes(username);
+    return this.players.some((p) => p.getUsername() === username);
   }
 
   setGameType(gameType: string) {

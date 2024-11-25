@@ -89,7 +89,7 @@ export default class EventHandler {
     // emit updates
     io.in(room.getID()).emit(serverEvents.roomUpdate, {
       gameid: room.getID() + '',
-      players: room?.getPlayers(),
+      players: room?.getPlayers().map(player => player.getUsername()),
       gameType: room?.getGameType()
     } as IServer.IRoomUpdate)
   }
