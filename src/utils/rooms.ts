@@ -42,8 +42,8 @@ export class Room {
     this.currentRound = 1;
   }
 
-  addPlayer(username: string) {
-    const player = new Player(username)
+  addPlayer(username: string, socketId: string) {
+    const player = new Player(username, socketId)
     this.players.push(player);
   }
 
@@ -101,10 +101,12 @@ export class Player {
   private prompt: string;
   private caption: string;
   private drawing: string;
+  private socketId: string;
 
   // Constructor with default values for all attributes
   constructor(
     username: string,
+    socketId: string,
     score: number = 0,
     nouns: string[] = [],
     verbs: string[] = [],
@@ -113,6 +115,7 @@ export class Player {
     drawing: string = ''
   ) {
     this.username = username;
+    this.socketId = socketId;
     this.score = score;
     this.nouns = nouns;
     this.verbs = verbs;
@@ -123,6 +126,10 @@ export class Player {
 
   getUsername() {
     return this.username;
+  }
+
+  getSocketId() {
+    return this.socketId; // Add getter for socketId
   }
 
   getScore() {

@@ -23,7 +23,7 @@ export default class EventHandler {
 
       // update rooms object
       const room = rooms.addRoomWithID(roomid + '', request.gameType, request.rounds);
-      room?.addPlayer(request.username);
+      room?.addPlayer(request.username, socket.id);
       room?.setGameType(request.gameType);
       room?.setTotalRounds(request.rounds);
 
@@ -54,7 +54,7 @@ export default class EventHandler {
       } // Username taken, append _1
       print(`User ${username} joined room ${request.gameid}`)
       socket.join(request.gameid) // add user to room
-      room?.addPlayer(username); // add user to room object
+      room?.addPlayer(username, socket.id); // add user to room object
 
       socket.emit(serverEvents.connected) // inform client of successful connection
       if (room) this.emitRoomUpdate(io, room) // send room update to all clients in room
@@ -114,8 +114,9 @@ export default class EventHandler {
         return;
       }
       // Game hasn't ended, start the round
+      console.log('----------------------------------------------------------------------------------------------')
       console.log(`Game ${room.getID()} Round ${room.getCurrentRound()} out of ${room.getTotalRounds()}`);
-      const g = new GameLogic(io, request.gameid);
+      const g = new GameLogic(io, socket, room);
       g.startRound();
       // Round ended, increment current round and emit to clients
       room.setCurrentRound(room.getCurrentRound() + 1);
@@ -129,7 +130,7 @@ export default class EventHandler {
   static handleSubmitWordSelection(io: Server, socket: Socket, request: IClient.ISubmitWordSelection) {
     try {
       const { gameid, username, selectedNouns, selectedVerbs } = request;
-      console.log('**********************************************************************************************')
+      console.log('----------------------------------------------------------------------------------------------')
       console.log(`Received selected words from ${username} for game ${gameid}:`, selectedNouns, selectedVerbs);
       // Store the words for the user
       const room = rooms.getRoom(request.gameid)
@@ -142,7 +143,6 @@ export default class EventHandler {
       const v = p.getVerbs()
       console.log(`saved words for player ${p.getUsername()}:\nNouns: ${n.length > 0 ? n.join(", ") : ""}\nVerbs: ${v.length > 0 ? v.join(", ") : ""}`
       )
-      console.log('**********************************************************************************************')
 
     } catch (e: any) {
       print(e.message);

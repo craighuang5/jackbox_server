@@ -1,18 +1,25 @@
-import { Server } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { serverEvents } from '../types/events';
-import { Room } from './rooms';
+import { Room, Player } from './rooms';
 import * as IServer from '../types/IServer';
-import { STATE_DURATIONS, STATE_NAMES } from './gameConstants';
+import { STATE_DURATIONS, STATE_NAMES, GEMINI_PROMPT } from './gameConstants';
+import axios from 'axios';
 
 class GameLogic {
   private io: Server;
+  private socket: Socket;
+  private room: Room;
+  private players: Player[]
   private gameid: string;
   private currentState: number;
   private stateOrder: string[];
 
-  constructor(io: Server, gameid: string) {
+  constructor(io: Server, socket: Socket, room: Room) {
     this.io = io;
-    this.gameid = gameid;
+    this.socket = socket;
+    this.room = room;
+    this.players = room.getPlayers();
+    this.gameid = room.getID();
     this.currentState = 0;
     this.stateOrder = [
       STATE_NAMES.wordSelect,
@@ -21,6 +28,19 @@ class GameLogic {
       STATE_NAMES.vote,
       STATE_NAMES.score,
     ];
+  }
+
+  private waitSeconds(seconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+
+  private async useGemini(data: Record<string, any>): Promise<string> {
+    try {
+      const response = await axios.post<{ response: string }>('http://localhost:3000/generate-prompt', data);
+      return response.data.response.trim();
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to generate response');
+    }
   }
 
   startRound() {
@@ -41,28 +61,54 @@ class GameLogic {
     }, 1000);
   }
 
-  private handleTimerEnd() {
+  private async handleTimerEnd() {
     const currentStateName = this.stateOrder[this.currentState];
     if (currentStateName === STATE_NAMES.wordSelect) {
-      // Do something
+
+      // Create an array to store the prompts for each player
+      const promptPromises = this.players.map(async (player) => {
+        const nouns = player.getNouns();
+        const verbs = player.getVerbs();
+        const nounsList = nouns.length > 0 ? nouns.join(", ") : "no nouns selected";
+        const verbsList = verbs.length > 0 ? verbs.join(", ") : "no verbs selected";
+
+        // Construct the prompt by appending the selected nouns and verbs
+        const prompt = `${GEMINI_PROMPT} Nouns: ${nounsList}. Verbs: ${verbsList}.`;
+        const input = { prompt: prompt };
+        try {
+          const response = await this.useGemini(input);
+          player.setPrompt(response);
+          console.log('----------------------------------------------------------------------------------------------');
+          console.log(`Player ${player.getUsername()}'s prompt:\n${player.getPrompt()}`);
+        } catch (error) {
+          console.error(`Failed to generate prompt for player ${player.getUsername()}:`, error);
+        }
+      });
+
+      // Wait for all prompt generation to complete
+      await Promise.all(promptPromises);
+
+      // Emit the prompts to all players after all have been generated
+      for (const player of this.players) {
+        this.io.to(player.getSocketId()).emit(serverEvents.sendPrompt, {
+          'username': player.getUsername(),
+          'prompt': player.getPrompt()
+        } as IServer.ISendPrompt);
+      }
+
+      // Start the prompt reveal page after waiting
+      this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
+      await this.waitSeconds(5);
     }
+
+    // Move to the next state after all prompts are revealed
     this.currentState += 1;
     this.handleCurrentState();
   }
 
   private handleCurrentState() {
     const currentStateName = this.stateOrder[this.currentState];
-    // const stateName = this.stateOrder[this.currentState];
-    // console.log(`Transitioned to state: ${stateName}`);
-    // // If statements for each state
-    // // Emit the event
-    // // Handle updating the room
-    // // Start the timer
-    // const duration = GAME_DURATIONS[this.currentState];
-    // this.startTimer(duration);
-
     if (currentStateName === STATE_NAMES.wordSelect) {
-
       this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
       this.startTimer(STATE_DURATIONS.wordSelect);
     }

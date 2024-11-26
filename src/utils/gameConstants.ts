@@ -13,3 +13,5 @@ export const STATE_NAMES = {
   vote: "vote",
   score: "score",
 };
+
+export const GEMINI_PROMPT = "Give me a hilarious haiku that contains these words: "

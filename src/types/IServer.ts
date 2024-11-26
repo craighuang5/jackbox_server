@@ -23,3 +23,8 @@ export interface ITimerUpdate {
   gameid: string;
   time: number;
 }
+
+export interface ISendPrompt {
+  username: string;
+  prompt: string;
+}

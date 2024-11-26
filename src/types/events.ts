@@ -3,14 +3,20 @@ let serverEvents = {
   "roomUpdate": "roomUpdate",
   "usernameTaken": "usernameTaken",
   "connected": "connected",
-  "tutorialStart": "tutorialStart",
   "error": "error",
+  // Emits that notify game state change
+  "tutorialStart": "tutorialStart",
   "wordSelectStart": "wordSelectStart",
   "drawStart": "drawStart",
   "captionStart": "captionStart",
   "voteStart": "voteStart",
   "scoreStart": "scoreStart",
   "winnerStart": "winnerStart",
+  // Emits that notify transition state change
+  "promptRevealStart": "promptRevealStart",
+  // Emits that send player information
+  "sendPrompt": "sendPrompt",
+  // Emit that updates the timer
   "timerUpdate": "timerUpdate",
 }
 
