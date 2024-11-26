@@ -95,6 +95,7 @@ class GameLogic {
           'username': player.getUsername(),
           'prompt': player.getPrompt()
         } as IServer.ISendPrompt);
+        console.log(`Sent prompt to ${player.getUsername()}`)
       }
 
       // Start the prompt reveal page after waiting
