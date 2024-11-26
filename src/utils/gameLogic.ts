@@ -31,21 +31,12 @@ class GameLogic {
     ];
   }
 
-  private waitSeconds(seconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-  }
-
-  private async useGemini(data: Record<string, any>): Promise<string> {
-    try {
-      const response = await axios.post<{ response: string }>(`${serverUrl}/generate-prompt`, data);
-      return response.data.response.trim();
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || 'Failed to generate response');
-    }
-  }
-
   startRound() {
     this.handleCurrentState();
+  }
+
+  private waitSeconds(seconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
   }
 
   private startTimer(duration: number) {
@@ -62,45 +53,18 @@ class GameLogic {
     }, 1000);
   }
 
+  private handleCurrentState() {
+    const currentStateName = this.stateOrder[this.currentState];
+    if (currentStateName === STATE_NAMES.wordSelect) {
+      this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
+      this.startTimer(STATE_DURATIONS.wordSelect);
+    }
+  }
+
   private async handleTimerEnd() {
     const currentStateName = this.stateOrder[this.currentState];
     if (currentStateName === STATE_NAMES.wordSelect) {
-
-      // Create an array to store the prompts for each player
-      const promptPromises = this.players.map(async (player) => {
-        const nouns = player.getNouns();
-        const verbs = player.getVerbs();
-        const nounsList = nouns.length > 0 ? nouns.join(", ") : "no nouns selected";
-        const verbsList = verbs.length > 0 ? verbs.join(", ") : "no verbs selected";
-
-        // Construct the prompt by appending the selected nouns and verbs
-        const prompt = `${GEMINI_PROMPT} Nouns: ${nounsList}. Verbs: ${verbsList}.`;
-        const input = { prompt: prompt };
-        try {
-          const response = await this.useGemini(input);
-          player.setPrompt(response);
-          console.log('----------------------------------------------------------------------------------------------');
-          console.log(`Player ${player.getUsername()}'s prompt:\n${player.getPrompt()}`);
-        } catch (error) {
-          console.error(`Failed to generate prompt for player ${player.getUsername()}:`, error);
-        }
-      });
-
-      // Wait for all prompt generation to complete
-      await Promise.all(promptPromises);
-
-      // Emit the prompts to all players after all have been generated
-      for (const player of this.players) {
-        this.io.to(player.getSocketId()).emit(serverEvents.sendPrompt, {
-          'username': player.getUsername(),
-          'prompt': player.getPrompt()
-        } as IServer.ISendPrompt);
-        console.log(`Sent prompt to ${player.getUsername()}`)
-      }
-
-      // Start the prompt reveal page after waiting
-      this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
-      await this.waitSeconds(5);
+      await this.handleWordSelectEnd();
     }
 
     // Move to the next state after all prompts are revealed
@@ -108,12 +72,51 @@ class GameLogic {
     this.handleCurrentState();
   }
 
-  private handleCurrentState() {
-    const currentStateName = this.stateOrder[this.currentState];
-    if (currentStateName === STATE_NAMES.wordSelect) {
-      this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
-      this.startTimer(STATE_DURATIONS.wordSelect);
+  private async useGemini(data: Record<string, any>): Promise<string> {
+    try {
+      const response = await axios.post<{ response: string }>(`${serverUrl}/generate-prompt`, data);
+      return response.data.response.trim();
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || 'Failed to generate response');
     }
+  }
+
+  private async handleWordSelectEnd() {
+    // Create an array to store the prompts for each player
+    const promptPromises = this.players.map(async (player) => {
+      const nouns = player.getNouns();
+      const verbs = player.getVerbs();
+      const nounsList = nouns.length > 0 ? nouns.join(", ") : "no nouns selected";
+      const verbsList = verbs.length > 0 ? verbs.join(", ") : "no verbs selected";
+
+      // Construct the prompt by appending the selected nouns and verbs
+      const prompt = `${GEMINI_PROMPT} Nouns: ${nounsList}. Verbs: ${verbsList}.`;
+      const input = { prompt: prompt };
+      try {
+        const response = await this.useGemini(input);
+        player.setPrompt(response);
+        console.log('----------------------------------------------------------------------------------------------');
+        console.log(`Player ${player.getUsername()}'s prompt:\n${player.getPrompt()}`);
+      } catch (error) {
+        console.error(`Failed to generate prompt for player ${player.getUsername()}:`, error);
+      }
+    });
+
+    // Wait for all prompt generation to complete
+    await Promise.all(promptPromises);
+
+    // Emit the prompts to all players after all have been generated
+    for (const player of this.players) {
+      this.io.to(player.getSocketId()).emit(serverEvents.sendPrompt, {
+        'username': player.getUsername(),
+        'prompt': player.getPrompt()
+      } as IServer.ISendPrompt);
+      console.log(`Sent prompt to ${player.getUsername()}`)
+    }
+
+    // Start the prompt reveal page after waiting
+    this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
+    await this.waitSeconds(5);
   }
 }
 
