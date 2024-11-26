@@ -4,6 +4,7 @@ import { Room, Player } from './rooms';
 import * as IServer from '../types/IServer';
 import { STATE_DURATIONS, STATE_NAMES, GEMINI_PROMPT } from './gameConstants';
 import axios from 'axios';
+import origin from './originConfig';
 
 class GameLogic {
   private io: Server;
@@ -36,7 +37,7 @@ class GameLogic {
 
   private async useGemini(data: Record<string, any>): Promise<string> {
     try {
-      const response = await axios.post<{ response: string }>('http://localhost:3000/generate-prompt', data);
+      const response = await axios.post<{ response: string }>(`${origin.deployedServer}/generate-prompt`, data);
       return response.data.response.trim();
     } catch (error: any) {
       throw new Error(error.response?.data?.error || 'Failed to generate response');
