@@ -59,6 +59,10 @@ class GameLogic {
       this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
       this.startTimer(STATE_DURATIONS.wordSelect);
     }
+    else if (currentStateName === STATE_NAMES.draw) {
+      this.io.in(this.gameid).emit(serverEvents.drawStart);
+      // this.startTimer(STATE_DURATIONS.draw);
+    }
   }
 
   private async handleTimerEnd() {
