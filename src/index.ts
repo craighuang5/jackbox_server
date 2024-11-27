@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000; // port to listen on
 
 const io = new Server(httpServer, { // create socket server
   cors: {
-    origin: [process.env.CLIENT_ORIGIN, ],
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST"],
     credentials: true
   }
