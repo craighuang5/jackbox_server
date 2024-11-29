@@ -1,3 +1,5 @@
+import { matchUp } from "./matchUp";
+
 export class Rooms {
   private rooms: Room[];
 
@@ -33,6 +35,8 @@ export class Room {
   private gameType: string;
   private totalRounds: number;
   private currentRound: number;
+  private matchUps: matchUp[]
+
 
   constructor(id: string, gameType: string, totalRounds: number) {
     this.id = id;
@@ -40,6 +44,7 @@ export class Room {
     this.gameType = gameType;
     this.totalRounds = totalRounds;
     this.currentRound = 1;
+    this.matchUps = [];
   }
 
   addPlayer(username: string, socketId: string) {
@@ -90,6 +95,14 @@ export class Room {
   getPlayerByUsername(username: string): Player | null {
     const player = this.players.find((p) => p.getUsername() === username);
     return player || null;
+  }
+
+  getMatchUps() {
+    return this.matchUps;
+  }
+
+  setMatchUps(matchUps: matchUp[]) {
+    this.matchUps = matchUps;
   }
 }
 

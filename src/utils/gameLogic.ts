@@ -2,7 +2,7 @@ import { Socket, Server } from "socket.io";
 import { serverEvents } from '../types/events';
 import { Room, Player } from './rooms';
 import * as IServer from '../types/IServer';
-import { STATE_DURATIONS, STATE_NAMES, GEMINI_PROMPT } from './gameConstants';
+import { STATE_DURATIONS, STATE_NAMES, GEMINI_CHAMPION } from './gameConstants';
 import axios from 'axios';
 import { serverUrl } from "./originConfig";
 
@@ -24,8 +24,8 @@ class GameLogic {
     this.currentState = 0;
     this.stateOrder = [
       STATE_NAMES.wordSelect,
-      STATE_NAMES.draw,
-      STATE_NAMES.caption,
+      STATE_NAMES.createChampion,
+      STATE_NAMES.createChallenger,
       STATE_NAMES.vote,
       STATE_NAMES.score,
     ];
@@ -59,9 +59,21 @@ class GameLogic {
       this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
       this.startTimer(STATE_DURATIONS.wordSelect);
     }
-    else if (currentStateName === STATE_NAMES.draw) {
-      this.io.in(this.gameid).emit(serverEvents.drawStart);
-      // this.startTimer(STATE_DURATIONS.draw);
+    else if (currentStateName === STATE_NAMES.createChampion) {
+      this.io.in(this.gameid).emit(serverEvents.createChampion);
+      this.startTimer(STATE_DURATIONS.createChampion);
+    }
+    else if (currentStateName === STATE_NAMES.createChallenger) {
+      // Case when there are even number of players
+      // We can match players up without worry of excluding anyone
+      if (this.players.length % 2 == 0) {
+        this.assignEvenChallengers()
+      }
+      // Case where there are odd number of players, ensure matchups cannot have repeats
+      // i.e. If we have Champ A vs Challenger B and Champ B vs Challenger A, Champ C is all alone
+      else {
+        this.assignOddChallengers()
+      }
     }
   }
 
@@ -69,6 +81,16 @@ class GameLogic {
     const currentStateName = this.stateOrder[this.currentState];
     if (currentStateName === STATE_NAMES.wordSelect) {
       await this.handleWordSelectEnd();
+    }
+    else if (currentStateName === STATE_NAMES.createChampion) {
+      await this.waitSeconds(5); // TODO: currently hard coded to wait for clients to send their champions. Dynamically code this to start after all champions are sent
+      const matchUps = this.room.getMatchUps()
+      console.log('---------------------------------------------------------------------------------------------')
+      matchUps.forEach((matchUp) => {
+        const championPlayer = matchUp.getChampionPlayer().getUsername();
+        const challengerPlayer = matchUp.getChallengerPlayer()?.getUsername() || 'No challenger yet';
+        console.log(`Champion: ${championPlayer}, Challenger: ${challengerPlayer}`);
+      });
     }
 
     // Move to the next state after all prompts are revealed
@@ -94,7 +116,7 @@ class GameLogic {
       const verbsList = verbs.length > 0 ? verbs.join(", ") : "no verbs selected";
 
       // Construct the prompt by appending the selected nouns and verbs
-      const prompt = `${GEMINI_PROMPT} Nouns: ${nounsList}. Verbs: ${verbsList}.`;
+      const prompt = `${GEMINI_CHAMPION}${nounsList},${verbsList}.`;
       const input = { prompt: prompt };
       try {
         const response = await this.useGemini(input);
@@ -115,13 +137,64 @@ class GameLogic {
         'username': player.getUsername(),
         'prompt': player.getPrompt()
       } as IServer.ISendPrompt);
+      console.log('---------------------------------------------------------------------------------------------')
       console.log(`Sent prompt to ${player.getUsername()}`)
     }
 
     // Start the prompt reveal page after waiting
     this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
-    await this.waitSeconds(5);
   }
+
+  private assignEvenChallengers() {
+    console.log('---------------------------------------------------------------------------------------------')
+    console.log('Even number of players detected, random')
+    const matchUps = this.room.getMatchUps();
+    const players = this.room.getPlayers();
+    const chosenChallengers = new Set<Player>();
+
+    matchUps.forEach((matchUp) => {
+      // Filter available players: exclude those who are already chosen as challengers or the current champion
+      const availablePlayers = players.filter(player =>
+        player !== matchUp.getChampionPlayer() && !chosenChallengers.has(player)
+      );
+
+      // If there are available players, select a random challenger
+      if (availablePlayers.length > 0) {
+        const chosenChallenger = availablePlayers[0];
+
+        if (players.length % 2 == 0) {
+          const randomIndex = Math.floor(Math.random() * availablePlayers.length);
+          const chosenChallenger = availablePlayers[randomIndex];
+        }
+        // Set the challenger and mark them as chosen
+        matchUp.setChallengerPlayer(chosenChallenger);
+        chosenChallengers.add(chosenChallenger);
+        console.log(`Created matchup with player: ${matchUp.getChampionPlayer().getUsername()}, Challenger: ${matchUp.getChallengerPlayer()?.getUsername()}`);
+      } else {
+        // Handle case when no available players are left for a matchup (should never occur)
+        console.log(`No available challengers for Champion: ${matchUp.getChampionPlayer().getUsername()}`);
+      }
+    });
+  }
+
+  private assignOddChallengers() {
+    console.log('---------------------------------------------------------------------------------------------');
+    console.log('Odd number of players detected, no repeating matchups');
+
+    const players = this.room.getPlayers();
+    const matchUps = this.room.getMatchUps();
+
+    // Simple pairing logic: pair players sequentially
+    for (let i = 0; i < players.length; i++) {
+      const currentPlayer = players[i];
+      const nextPlayer = players[(i + 1) % players.length];  // Pair the last player with the first one
+
+      const matchUp = matchUps[i];
+      matchUp.setChallengerPlayer(nextPlayer);
+      console.log(`Created matchup: Champion: ${currentPlayer.getUsername()}, Challenger: ${nextPlayer.getUsername()}`);
+    }
+  }
+
 }
 
 export default GameLogic;

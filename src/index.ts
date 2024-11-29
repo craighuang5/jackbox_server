@@ -58,6 +58,14 @@ io.on("connection", (socket) => {
 
   // Handle submit words
   socket.on(clientEvents.submitWordSelection, (request: IClient.ISubmitWordSelection) => EventHandler.handleSubmitWordSelection(io, socket, request))
+
+  // Handle submit champion
+  socket.on(clientEvents.submitChampion, (request: IClient.ISubmitChampion) => EventHandler.handleSubmitChampion(io, socket, request))
+
+  // Handle submit challenger
+  socket.on(clientEvents.submitChallenger, (request: IClient.ISubmitChallenger) => EventHandler.handleSubmitChallenger(io, socket, request))
+
+
 });
 
 httpServer.listen(port);

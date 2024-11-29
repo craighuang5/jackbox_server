@@ -8,6 +8,7 @@ import * as Errors from '../types/errors';
 import 'dotenv/config'
 import { server } from "typescript";
 import GameLogic from './gameLogic';
+import { matchUp } from "./matchUp";
 
 let roomid = 1;
 const rooms = new Rooms();
@@ -144,6 +145,36 @@ export default class EventHandler {
       console.log(`saved words for player ${p.getUsername()}:\nNouns: ${n.length > 0 ? n.join(", ") : ""}\nVerbs: ${v.length > 0 ? v.join(", ") : ""}`
       )
 
+    } catch (e: any) {
+      print(e.message);
+      socket.emit(serverEvents.error, e.message);
+    }
+  }
+
+  static handleSubmitChampion(io: Server, socket: Socket, request: IClient.ISubmitChampion) {
+    try {
+      const { gameid, username, drawing, caption } = request;
+      console.log('----------------------------------------------------------------------------------------------')
+      console.log(`Received challenger from ${username} for game ${gameid}`);
+      // Store the drawing for the user
+      const room = rooms.getRoom(request.gameid)
+      if (!room) throw Errors.INVALID_GAMEID;
+      const p = room.getPlayerByUsername(request.username)
+      if (!p) throw Errors.USER_NOT_DEFINED;
+      p.setDrawing(drawing)
+      p.setCaption(caption)
+      const matchups = room.getMatchUps();
+      matchups.push(new matchUp(drawing, caption, p));
+      room.setMatchUps(matchups);
+    } catch (e: any) {
+      print(e.message);
+      socket.emit(serverEvents.error, e.message);
+    }
+  }
+
+  static handleSubmitChallenger(io: Server, socket: Socket, request: IClient.ISubmitChampion) {
+    try {
+      const { gameid, username, drawing, caption } = request
     } catch (e: any) {
       print(e.message);
       socket.emit(serverEvents.error, e.message);

@@ -1,0 +1,67 @@
+import { Player } from "./rooms";
+
+export class matchUp {
+  private championDrawing: string;
+  private championCaption: string;
+  private championPlayer: Player;
+  private challengerDrawing: string;
+  private challengerCaption: string;
+  private challengerPlayer: Player | null;
+
+  constructor(championDrawing: string, championCaption: string, championPlayer: Player) {
+    this.championDrawing = championDrawing;
+    this.championCaption = championCaption;
+    this.championPlayer = championPlayer;
+    this.challengerDrawing = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjH3g/eTAAAAtGVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAACAAAAMQECAA4AAABaAAAAaYcEAAEAAABoAAAAAAAAAGAAAAABAAAAYAAAAAEAAABQYWludC5ORVQgNS4xAAMAAJAHAAQAAAAwMjMwAaADAAEAAAABAAAABaAEAAEAAACSAAAAAAAAAAIAAQACAAQAAABSOTgAAgAHAAQAAAAwMTAwAAAAAGOkJsRSTv3MAAAADElEQVQYV2P4//8/AAX+Av6nNYGEAAAAAElFTkSuQmCC';
+    this.challengerCaption = '';
+    this.challengerPlayer = null;
+  }
+
+  getChampionDrawing(): string {
+    return this.championDrawing;
+  }
+
+  setChampionDrawing(value: string) {
+    this.championDrawing = value;
+  }
+
+  getChampionCaption(): string {
+    return this.championCaption;
+  }
+
+  setChampionCaption(value: string) {
+    this.championCaption = value;
+  }
+
+  getChampionPlayer(): Player {
+    return this.championPlayer;
+  }
+
+  setChampionPlayer(value: Player) {
+    this.championPlayer = value;
+  }
+
+  getChallengerDrawing(): string {
+    return this.challengerDrawing;
+  }
+
+  setChallengerDrawing(value: string) {
+    this.challengerDrawing = value;
+  }
+
+  getChallengerCaption(): string {
+    return this.challengerCaption;
+  }
+
+  setChallengerCaption(value: string) {
+    this.challengerCaption = value;
+  }
+
+  getChallengerPlayer(): Player | null {
+    return this.challengerPlayer;
+  }
+
+  setChallengerPlayer(value: Player | null) {
+    this.challengerPlayer = value;
+  }
+}

@@ -20,8 +20,9 @@ export interface ILeaveGame {
   gameid: string;
 }
 
-export interface IStartWordSelect {
+export interface IStartRound {
   gameid: string;
+  currentRound: number
 }
 
 export interface ISubmitWordSelection {
@@ -31,7 +32,16 @@ export interface ISubmitWordSelection {
   selectedVerbs: string[];
 }
 
-export interface IStartRound {
+export interface ISubmitChampion {
   gameid: string;
-  currentRound: number
+  username: string;
+  drawing: string;
+  caption: string;
+}
+
+export interface ISubmitChallenger {
+  gameid: string;
+  username: string;
+  drawing: string;
+  caption: string;
 }

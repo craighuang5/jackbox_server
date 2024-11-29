@@ -9,15 +9,12 @@ if (!apiKey) {
   throw new Error("GEMINI_API_KEY is not defined in the environment variables.");
 }
 
-// Log the API key to the console
-console.log("Using API Key:", apiKey);
-
 const configuration = new GoogleGenerativeAI(apiKey);
 // Model initialization
 const modelId = "gemini-1.5-flash";
-const model = configuration.getGenerativeModel({ model: modelId });
 
 export const generatePrompt = async (prompt: string): Promise<string> => {
+  const model = configuration.getGenerativeModel({ model: modelId });
   const chat = model.startChat({
     history: [], // No history, making individual requests
     generationConfig: {
