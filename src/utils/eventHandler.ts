@@ -155,8 +155,8 @@ export default class EventHandler {
     try {
       const { gameid, username, drawing, caption } = request;
       console.log('----------------------------------------------------------------------------------------------')
-      console.log(`Received challenger from ${username} for game ${gameid}`);
-      // Store the drawing for the user
+      console.log(`Received champion from ${username} for game ${gameid}`);
+      // Store the champion for the user
       const room = rooms.getRoom(request.gameid)
       if (!room) throw Errors.INVALID_GAMEID;
       const p = room.getPlayerByUsername(request.username)
@@ -174,7 +174,19 @@ export default class EventHandler {
 
   static handleSubmitChallenger(io: Server, socket: Socket, request: IClient.ISubmitChampion) {
     try {
-      const { gameid, username, drawing, caption } = request
+      const { gameid, username, drawing, caption } = request;
+      console.log('----------------------------------------------------------------------------------------------')
+      console.log(`Received challenger from ${username} for game ${gameid}`);
+      // Store the challenger for the user, find the matchup they belong to first
+      const room = rooms.getRoom(request.gameid)
+      if (!room) throw Errors.INVALID_GAMEID;
+      const p = room.getPlayerByUsername(request.username)
+      if (!p) throw Errors.USER_NOT_DEFINED;
+      p.setDrawing(drawing)
+      p.setCaption(caption)
+      const matchups = room.getMatchUps();
+      matchups.push(new matchUp(drawing, caption, p));
+      room.setMatchUps(matchups);
     } catch (e: any) {
       print(e.message);
       socket.emit(serverEvents.error, e.message);

@@ -3,8 +3,10 @@ import { serverEvents } from '../types/events';
 import { Room, Player } from './rooms';
 import * as IServer from '../types/IServer';
 import { STATE_DURATIONS, STATE_NAMES, GEMINI_CHAMPION } from './gameConstants';
+import * as Errors from '../types/errors';
 import axios from 'axios';
 import { serverUrl } from "./originConfig";
+import { matchUp } from "./matchUp";
 
 class GameLogic {
   private io: Server;
@@ -55,6 +57,8 @@ class GameLogic {
 
   private handleCurrentState() {
     const currentStateName = this.stateOrder[this.currentState];
+    console.log('----------------------------------------------------------------------------------------------')
+    console.log(`Current state: ${currentStateName}`)
     if (currentStateName === STATE_NAMES.wordSelect) {
       this.io.in(this.gameid).emit(serverEvents.wordSelectStart);
       this.startTimer(STATE_DURATIONS.wordSelect);
@@ -64,16 +68,18 @@ class GameLogic {
       this.startTimer(STATE_DURATIONS.createChampion);
     }
     else if (currentStateName === STATE_NAMES.createChallenger) {
-      // Case when there are even number of players
-      // We can match players up without worry of excluding anyone
-      if (this.players.length % 2 == 0) {
-        this.assignEvenChallengers()
-      }
-      // Case where there are odd number of players, ensure matchups cannot have repeats
-      // i.e. If we have Champ A vs Challenger B and Champ B vs Challenger A, Champ C is all alone
-      else {
-        this.assignOddChallengers()
-      }
+      const matchUps = this.room.getMatchUps();
+      matchUps.forEach((matchUp) => {
+        const challenger = matchUp.getChallengerPlayer();
+        if (challenger) {
+          this.io.to(challenger.getSocketId()).emit(serverEvents.sendMatchUp, {
+            'championDrawing': matchUp.getChampionDrawing(),
+            'championCaption': matchUp.getChampionCaption(),
+          } as IServer.ISendMatchup);
+        }
+      });
+      this.io.in(this.gameid).emit(serverEvents.createChallenger);
+      this.startTimer(STATE_DURATIONS.createChallenger);
     }
   }
 
@@ -91,6 +97,16 @@ class GameLogic {
         const challengerPlayer = matchUp.getChallengerPlayer()?.getUsername() || 'No challenger yet';
         console.log(`Champion: ${championPlayer}, Challenger: ${challengerPlayer}`);
       });
+      // Case when there are even number of players
+      // We can match players up without worry of excluding anyone
+      if (this.players.length % 2 == 0) {
+        this.assignEvenChallengers()
+      }
+      // Case where there are odd number of players, ensure matchups cannot have repeats
+      // i.e. If we have Champ A vs Challenger B and Champ B vs Challenger A, Champ C is all alone
+      else {
+        this.assignOddChallengers()
+      }
     }
 
     // Move to the next state after all prompts are revealed

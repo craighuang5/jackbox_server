@@ -18,3 +18,8 @@ export interface ISendPrompt {
   username: string;
   prompt: string;
 }
+
+export interface ISendMatchup {
+  championCaption: string;
+  championDrawing: string;
+}
