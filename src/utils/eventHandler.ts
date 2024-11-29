@@ -155,7 +155,7 @@ export default class EventHandler {
     try {
       const { gameid, username, drawing, caption } = request;
       console.log('----------------------------------------------------------------------------------------------')
-      console.log(`Received champion from ${username} for game ${gameid}`);
+      console.log(`Received champion from ${username} for game ${gameid}: ${caption}`);
       // Store the champion for the user
       const room = rooms.getRoom(request.gameid)
       if (!room) throw Errors.INVALID_GAMEID;
@@ -172,21 +172,27 @@ export default class EventHandler {
     }
   }
 
-  static handleSubmitChallenger(io: Server, socket: Socket, request: IClient.ISubmitChampion) {
+  static handleSubmitChallenger(io: Server, socket: Socket, request: IClient.ISubmitChallenger) {
     try {
       const { gameid, username, drawing, caption } = request;
       console.log('----------------------------------------------------------------------------------------------')
-      console.log(`Received challenger from ${username} for game ${gameid}`);
+      console.log(`Received challenger from ${username} for game ${gameid}: ${caption}`);
       // Store the challenger for the user, find the matchup they belong to first
       const room = rooms.getRoom(request.gameid)
       if (!room) throw Errors.INVALID_GAMEID;
-      const p = room.getPlayerByUsername(request.username)
-      if (!p) throw Errors.USER_NOT_DEFINED;
-      p.setDrawing(drawing)
-      p.setCaption(caption)
-      const matchups = room.getMatchUps();
-      matchups.push(new matchUp(drawing, caption, p));
-      room.setMatchUps(matchups);
+      const matchUps = room.getMatchUps();
+      // Code to find the existing matchup and add the challenger to it
+      for (const matchUp of matchUps) {
+        const challengerPlayer = room.getPlayerByUsername(username)
+        if (matchUp.getChallengerPlayer()?.getUsername() === username) {
+          // If the champion player is found, check if there's no challenger yet
+          matchUp.setChallengerPlayer(challengerPlayer);
+          matchUp.setChallengerDrawing(drawing);
+          matchUp.setChallengerCaption(caption);
+          console.log(`Challenger set for ${username}`);
+          break;
+        }
+      }
     } catch (e: any) {
       print(e.message);
       socket.emit(serverEvents.error, e.message);

@@ -108,6 +108,17 @@ class GameLogic {
         this.assignOddChallengers()
       }
     }
+    else if (currentStateName === STATE_NAMES.createChallenger) {
+      const matchUps = this.room.getMatchUps()
+      console.log('---------------------------------------------------------------------------------------------')
+      matchUps.forEach((matchUp) => {
+        const championPlayer = matchUp.getChampionPlayer().getUsername();
+        const challengerPlayer = matchUp.getChallengerPlayer()?.getUsername() || 'No challenger yet';
+        const championCaption = matchUp.getChampionPlayer().getCaption();
+        const challengerCaption = matchUp.getChallengerPlayer()?.getCaption() || 'No challenger yet';
+        console.log(`Champion: ${championCaption} (${championPlayer}), Challenger: ${challengerCaption} (${challengerPlayer})`);
+      });
+    }
 
     // Move to the next state after all prompts are revealed
     this.currentState += 1;
