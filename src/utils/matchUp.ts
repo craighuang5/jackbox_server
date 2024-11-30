@@ -1,5 +1,6 @@
 import { Player } from "./rooms";
 import { POINTS } from "./gameConstants";
+import * as Errors from '../types/errors';
 
 export class matchUp {
   private prompt: string;
@@ -96,8 +97,9 @@ export class matchUp {
   }
 
   updatePlayerPoints() {
-    const currentChampionScore = this.championPlayer?.getScore()
-    const currentChallengerScore = this.championPlayer?.getScore()
+    const currentChampionScore = this.championPlayer.getScore()
+    if (!this.challengerPlayer) throw Errors.USER_NOT_DEFINED;
+    const currentChallengerScore = this.challengerPlayer.getScore()
     this.championPlayer?.setScore(currentChampionScore + this.championPoints * POINTS.multiplier)
 
     if (this.challengerPoints === this.championPoints) {

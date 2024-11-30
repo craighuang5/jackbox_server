@@ -78,6 +78,7 @@ class GameLogic {
             'championDrawing': matchUp.getChampionDrawing(),
             'championCaption': matchUp.getChampionCaption(),
           } as IServer.ISendMatchup);
+          console.log(`Sent champion ${matchUp.getChampionPlayer().getUsername()} to ${matchUp.getChallengerPlayer()?.getUsername()}`)
         }
       });
       this.io.in(this.gameid).emit(serverEvents.createChallenger);
@@ -132,16 +133,7 @@ class GameLogic {
         const challengerPlayer = matchUp.getChallengerPlayer()?.getUsername() || 'No challenger yet';
         console.log(`Champion: ${championPlayer}, Challenger: ${challengerPlayer}`);
       });
-      // Case when there are even number of players
-      // We can match players up without worry of excluding anyone
-      if (this.players.length % 2 == 0) {
-        this.assignEvenChallengers()
-      }
-      // Case where there are odd number of players, ensure matchups cannot have repeats
-      // i.e. If we have Champ A vs Challenger B and Champ B vs Challenger A, Champ C is all alone
-      else {
-        this.assignOddChallengers()
-      }
+      this.assignOddChallengers()
     }
     else if (currentStateName === STATE_NAMES.createChallenger) {
       const matchUps = this.room.getMatchUps()
@@ -259,13 +251,14 @@ class GameLogic {
     const matchUps = this.room.getMatchUps();
 
     // Simple pairing logic: pair players sequentially
-    for (let i = 0; i < players.length; i++) {
-      const currentPlayer = players[i];
-      const nextPlayer = players[(i + 1) % players.length];  // Pair the last player with the first one
-
+    for (let i = 0; i < matchUps.length; i++) {
       const matchUp = matchUps[i];
-      matchUp.setChallengerPlayer(nextPlayer);
-      console.log(`Created matchup: Champion: ${currentPlayer.getUsername()}, Challenger: ${nextPlayer.getUsername()}`);
+      const champion = matchUp.getChampionPlayer();
+      const championIndex = players.findIndex(player => player === champion);
+      const challengerIndex = (championIndex + 1) % players.length;
+      const challenger = players[challengerIndex];
+      matchUp.setChallengerPlayer(challenger);
+      console.log(`Created matchup: Champion: ${champion.getUsername()}, Challenger: ${challenger.getUsername()}`);
     }
   }
 
