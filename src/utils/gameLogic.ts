@@ -142,7 +142,9 @@ class GameLogic {
     else if (currentStateName === STATE_NAMES.vote) {
       this.currentMatchupNumber++;
       if (this.currentMatchupNumber < this.room.getMatchUps().length) {
+        console.log(`Current matchup number ${this.currentMatchupNumber + 1}/${this.room.getMatchUps().length}`)
         this.handleCurrentState()
+        return;
       }
     }
 
