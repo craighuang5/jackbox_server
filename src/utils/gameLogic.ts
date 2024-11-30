@@ -86,6 +86,10 @@ class GameLogic {
     else if (currentStateName === STATE_NAMES.vote) {
       const matchUps = this.room.getMatchUps()
       const currentMatchUp = matchUps[this.currentMatchupNumber]
+      this.io.in(this.gameid).emit(serverEvents.updateVoteCount, {
+        championPoints: currentMatchUp.getChampionPoints(),
+        challengerPoints: currentMatchUp.getChallengerPoints(),
+      } as IServer.IUpdateVoteCount);
       console.log('---------------------------------------------------------------------------------------------')
       const voteOption: IServer.ISendVoteOption = {
         prompt: currentMatchUp.getPrompt(),
@@ -142,6 +146,7 @@ class GameLogic {
     else if (currentStateName === STATE_NAMES.vote) {
       this.currentMatchupNumber++;
       if (this.currentMatchupNumber < this.room.getMatchUps().length) {
+        console.log('----------------------------------------------------------------------------------------------');
         console.log(`Current matchup number ${this.currentMatchupNumber + 1}/${this.room.getMatchUps().length}`)
         this.handleCurrentState()
         return;

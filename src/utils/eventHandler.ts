@@ -198,5 +198,25 @@ export default class EventHandler {
       socket.emit(serverEvents.error, e.message);
     }
   }
+
+  static handleSubmitVote(io: Server, socket: Socket, request: IClient.ISubmitVote) {
+    console.log(`Vote received: +${request.championPoints} for ${request.championUsername}, +${request.challengerPoints} for ${request.challengerUsername}`);
+
+    const room = rooms.getRoom(request.gameid)
+    if (!room) throw Errors.INVALID_GAMEID;
+    const currentMatchUp = room.getMatchUps().find(
+      (matchUp) => matchUp.getChampionPlayer().getUsername() === request.championUsername
+    );
+
+    // Update the points for the champion and challenger
+    currentMatchUp?.setChampionPoints(currentMatchUp?.getChampionPoints() + request.championPoints);
+    currentMatchUp?.setChallengerPoints(currentMatchUp?.getChallengerPoints() + request.challengerPoints);
+
+    // Emit the updated matchup to all clients in the room
+    io.in(request.gameid).emit(serverEvents.updateVoteCount, {
+      championPoints: currentMatchUp?.getChampionPoints(),
+      challengerPoints: currentMatchUp?.getChallengerPoints(),
+    } as IServer.IUpdateVoteCount);
+  }
 }
 

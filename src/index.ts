@@ -65,6 +65,8 @@ io.on("connection", (socket) => {
   // Handle submit challenger
   socket.on(clientEvents.submitChallenger, (request: IClient.ISubmitChallenger) => EventHandler.handleSubmitChallenger(io, socket, request))
 
+  // Handle submit vote
+  socket.on(clientEvents.submitVote, (request: IClient.ISubmitVote) => EventHandler.handleSubmitVote(io, socket, request))
 
 });
 

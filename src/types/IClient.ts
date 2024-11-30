@@ -46,3 +46,11 @@ export interface ISubmitChallenger {
   drawing: string;
   caption: string;
 }
+
+export interface ISubmitVote {
+  gameid: string;
+  championUsername: string;
+  championPoints: number;
+  challengerUsername: string;
+  challengerPoints: number;
+}

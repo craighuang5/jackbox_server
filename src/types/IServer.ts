@@ -33,3 +33,8 @@ export interface ISendVoteOption {
   challengerDrawing: string;
   challengerPlayerUsername: string;
 }
+
+export interface IUpdateVoteCount {
+  championPoints: number;
+  challengerPoints: number;
+}

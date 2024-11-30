@@ -8,6 +8,8 @@ export class matchUp {
   private challengerDrawing: string;
   private challengerCaption: string;
   private challengerPlayer: Player | null;
+  private championPoints: number;
+  private challengerPoints: number;
 
   constructor(prompt: string, championDrawing: string, championCaption: string, championPlayer: Player) {
     this.prompt = prompt;
@@ -17,6 +19,8 @@ export class matchUp {
     this.challengerDrawing = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjH3g/eTAAAAtGVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAACAAAAMQECAA4AAABaAAAAaYcEAAEAAABoAAAAAAAAAGAAAAABAAAAYAAAAAEAAABQYWludC5ORVQgNS4xAAMAAJAHAAQAAAAwMjMwAaADAAEAAAABAAAABaAEAAEAAACSAAAAAAAAAAIAAQACAAQAAABSOTgAAgAHAAQAAAAwMTAwAAAAAGOkJsRSTv3MAAAADElEQVQYV2P4//8/AAX+Av6nNYGEAAAAAElFTkSuQmCC';
     this.challengerCaption = '';
     this.challengerPlayer = null;
+    this.championPoints = 0;
+    this.challengerPoints = 0;
   }
   getPrompt(): string {
     return this.prompt;
@@ -72,5 +76,21 @@ export class matchUp {
 
   setChallengerPlayer(value: Player | null) {
     this.challengerPlayer = value;
+  }
+
+  getChampionPoints() {
+    return this.championPoints
+  }
+
+  setChampionPoints(value: number) {
+    this.championPoints = value
+  }
+
+  getChallengerPoints() {
+    return this.challengerPoints
+  }
+
+  setChallengerPoints(value: number) {
+    this.challengerPoints = value
   }
 }
