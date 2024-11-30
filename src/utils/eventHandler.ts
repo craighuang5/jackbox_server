@@ -102,6 +102,7 @@ export default class EventHandler {
       // Check if the game has ended (current round > total rounds)
       const room = rooms.getRoom(request.gameid)
       if (!room) throw Errors.INVALID_GAMEID;
+      room.setMatchUps([]);
       if (room.getCurrentRound() > room.getTotalRounds()) {
         console.log(`Game ${request.gameid} has ended. Emitting winners.`);
         // Game has ended, emit winners to all players in the room
