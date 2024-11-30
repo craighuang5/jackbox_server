@@ -1,4 +1,5 @@
 import { Player } from "./rooms";
+import { POINTS } from "./gameConstants";
 
 export class matchUp {
   private prompt: string;
@@ -92,5 +93,20 @@ export class matchUp {
 
   setChallengerPoints(value: number) {
     this.challengerPoints = value
+  }
+
+  updatePlayerPoints() {
+    const currentChampionScore = this.championPlayer?.getScore()
+    const currentChallengerScore = this.championPlayer?.getScore()
+    this.championPlayer?.setScore(currentChampionScore + this.championPoints * POINTS.multiplier)
+
+    if (this.challengerPoints === this.championPoints) {
+      this.challengerPlayer?.setScore(currentChallengerScore + this.challengerPoints * POINTS.multiplier + POINTS.bonus)
+    }
+    else {
+      this.challengerPlayer?.setScore(currentChallengerScore + this.challengerPoints * POINTS.multiplier)
+    }
+    console.log(`Player ${this.championPlayer?.getUsername()}'s points: ${this.championPlayer?.getScore()}`)
+    console.log(`Player ${this.challengerPlayer?.getUsername()}'s points: ${this.challengerPlayer?.getScore()}`)
   }
 }

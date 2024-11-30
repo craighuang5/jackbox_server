@@ -105,6 +105,17 @@ class GameLogic {
       this.io.in(this.gameid).emit(serverEvents.sendVoteOption, voteOption);
       this.startTimer(STATE_DURATIONS.vote);
     }
+    else if (currentStateName === STATE_NAMES.score) {
+      const playerScores = this.room.getPlayers().map(player => ({
+        username: player.getUsername(),
+        score: player.getScore(),
+      }));
+      console.log('---------------------------------------------------------------------------------------------')
+      console.log('Player Scores:', playerScores);
+      this.io.in(this.gameid).emit(serverEvents.scoreStart, {
+        scores: playerScores
+      } as IServer.IUpdateScoreboard);
+    }
   }
 
   private async handleTimerEnd() {
@@ -144,6 +155,9 @@ class GameLogic {
       });
     }
     else if (currentStateName === STATE_NAMES.vote) {
+      // Count up points and store into players
+      const currentMatchup = this.room.getMatchUps()[this.currentMatchupNumber];
+      currentMatchup.updatePlayerPoints()
       this.currentMatchupNumber++;
       if (this.currentMatchupNumber < this.room.getMatchUps().length) {
         console.log('----------------------------------------------------------------------------------------------');

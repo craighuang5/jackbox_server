@@ -18,3 +18,7 @@ export const GEMINI_CAPTION = "Create a name (unhinged, internet slang, no swear
 
 export const GEMINI_CHAMPION = "'Champion of' needs a completing phrase to be meaningful. It describes someone who is the best at something. Finish the sentence (give the continuation, make it general-public knowledge), given that the concept is about: "
 
+export const POINTS = {
+  multiplier: 100,
+  bonus: 50,
+};
