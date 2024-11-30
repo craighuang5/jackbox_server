@@ -16,6 +16,7 @@ class GameLogic {
   private gameid: string;
   private currentState: number;
   private stateOrder: string[];
+  private currentMatchupNumber: number;
 
   constructor(io: Server, socket: Socket, room: Room) {
     this.io = io;
@@ -31,6 +32,7 @@ class GameLogic {
       STATE_NAMES.vote,
       STATE_NAMES.score,
     ];
+    this.currentMatchupNumber = 0;
   }
 
   startRound() {
@@ -81,6 +83,24 @@ class GameLogic {
       this.io.in(this.gameid).emit(serverEvents.createChallenger);
       this.startTimer(STATE_DURATIONS.createChallenger);
     }
+    else if (currentStateName === STATE_NAMES.vote) {
+      const matchUps = this.room.getMatchUps()
+      const currentMatchUp = matchUps[this.currentMatchupNumber]
+      console.log('---------------------------------------------------------------------------------------------')
+      const voteOption: IServer.ISendVoteOption = {
+        prompt: currentMatchUp.getPrompt(),
+        championCaption: currentMatchUp.getChampionCaption(),
+        championDrawing: currentMatchUp.getChampionDrawing(),
+        championPlayerUsername: currentMatchUp.getChampionPlayer().getUsername(),
+        challengerCaption: currentMatchUp.getChallengerCaption(),
+        challengerDrawing: currentMatchUp.getChallengerDrawing(),
+        challengerPlayerUsername: currentMatchUp.getChallengerPlayer()?.getUsername() || 'No challenger yet',
+      };
+      // Emit the matchup and start the timer
+      console.log(`Matchup ${this.currentMatchupNumber + 1}: ${voteOption.championCaption} vs ${voteOption.challengerCaption} for the title of ${voteOption.prompt}`)
+      this.io.in(this.gameid).emit(serverEvents.sendVoteOption, voteOption);
+      this.startTimer(STATE_DURATIONS.vote);
+    }
   }
 
   private async handleTimerEnd() {
@@ -118,6 +138,12 @@ class GameLogic {
         const challengerCaption = matchUp.getChallengerPlayer()?.getCaption() || 'No challenger yet';
         console.log(`Champion: ${championCaption} (${championPlayer}), Challenger: ${challengerCaption} (${challengerPlayer})`);
       });
+    }
+    else if (currentStateName === STATE_NAMES.vote) {
+      this.currentMatchupNumber++;
+      if (this.currentMatchupNumber < this.room.getMatchUps().length) {
+        this.handleCurrentState()
+      }
     }
 
     // Move to the next state after all prompts are revealed

@@ -18,6 +18,7 @@ let serverEvents = {
   // Emits that send player information
   "sendPrompt": "sendPrompt",
   "sendMatchUp": "sendMatchup",
+  "sendVoteOption": "sendVoteOption",
   // Emit that updates the timer
   "timerUpdate": "timerUpdate",
 }

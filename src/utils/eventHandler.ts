@@ -153,7 +153,7 @@ export default class EventHandler {
 
   static handleSubmitChampion(io: Server, socket: Socket, request: IClient.ISubmitChampion) {
     try {
-      const { gameid, username, drawing, caption } = request;
+      const { gameid, username, prompt, drawing, caption } = request;
       console.log('----------------------------------------------------------------------------------------------')
       console.log(`Received champion from ${username} for game ${gameid}: ${caption}`);
       // Store the champion for the user
@@ -164,7 +164,7 @@ export default class EventHandler {
       p.setDrawing(drawing)
       p.setCaption(caption)
       const matchups = room.getMatchUps();
-      matchups.push(new matchUp(drawing, caption, p));
+      matchups.push(new matchUp(prompt, drawing, caption, p));
       room.setMatchUps(matchups);
     } catch (e: any) {
       print(e.message);

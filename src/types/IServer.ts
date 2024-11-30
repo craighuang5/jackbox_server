@@ -23,3 +23,13 @@ export interface ISendMatchup {
   championCaption: string;
   championDrawing: string;
 }
+
+export interface ISendVoteOption {
+  prompt: string;
+  championCaption: string;
+  championDrawing: string;
+  championPlayerUsername: string;
+  challengerCaption: string;
+  challengerDrawing: string;
+  challengerPlayerUsername: string;
+}

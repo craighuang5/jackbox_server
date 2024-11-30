@@ -1,6 +1,7 @@
 import { Player } from "./rooms";
 
 export class matchUp {
+  private prompt: string;
   private championDrawing: string;
   private championCaption: string;
   private championPlayer: Player;
@@ -8,13 +9,21 @@ export class matchUp {
   private challengerCaption: string;
   private challengerPlayer: Player | null;
 
-  constructor(championDrawing: string, championCaption: string, championPlayer: Player) {
+  constructor(prompt: string, championDrawing: string, championCaption: string, championPlayer: Player) {
+    this.prompt = prompt;
     this.championDrawing = championDrawing;
     this.championCaption = championCaption;
     this.championPlayer = championPlayer;
     this.challengerDrawing = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCA1LjH3g/eTAAAAtGVYSWZJSSoACAAAAAUAGgEFAAEAAABKAAAAGwEFAAEAAABSAAAAKAEDAAEAAAACAAAAMQECAA4AAABaAAAAaYcEAAEAAABoAAAAAAAAAGAAAAABAAAAYAAAAAEAAABQYWludC5ORVQgNS4xAAMAAJAHAAQAAAAwMjMwAaADAAEAAAABAAAABaAEAAEAAACSAAAAAAAAAAIAAQACAAQAAABSOTgAAgAHAAQAAAAwMTAwAAAAAGOkJsRSTv3MAAAADElEQVQYV2P4//8/AAX+Av6nNYGEAAAAAElFTkSuQmCC';
     this.challengerCaption = '';
     this.challengerPlayer = null;
+  }
+  getPrompt(): string {
+    return this.prompt;
+  }
+
+  setPrompt(value: string) {
+    this.prompt = value;
   }
 
   getChampionDrawing(): string {

@@ -33,6 +33,7 @@ export interface ISubmitWordSelection {
 }
 
 export interface ISubmitChampion {
+  prompt: string;
   gameid: string;
   username: string;
   drawing: string;
