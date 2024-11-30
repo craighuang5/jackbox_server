@@ -105,14 +105,16 @@ export default class EventHandler {
       room.setMatchUps([]);
       if (room.getCurrentRound() > room.getTotalRounds()) {
         console.log(`Game ${request.gameid} has ended. Emitting winners.`);
-        // Game has ended, emit winners to all players in the room
+        // Game has ended, find the player with the highest score
+        const players = room.getPlayers();
+        const winner = players.reduce((prev, current) => (prev.getScore() > current.getScore()) ? prev : current);
+        // Emit the winner to all players in the room
         io.in(request.gameid).emit(serverEvents.winnerStart, {
-          gameid: request.gameid,
-          players: room.getPlayers().map((player) => ({
-            username: player.getUsername(),
-            score: player.getScore(),
-          })),
-        });
+          username: winner.getUsername(),
+          drawings: winner.getDrawings(),
+          score: winner.getScore()
+        } as IServer.IWinnerStart);
+        console.log(`Sent winner to all clients`)
         return;
       }
       // Game hasn't ended, start the round
@@ -162,7 +164,9 @@ export default class EventHandler {
       if (!room) throw Errors.INVALID_GAMEID;
       const p = room.getPlayerByUsername(request.username)
       if (!p) throw Errors.USER_NOT_DEFINED;
-      p.setDrawing(drawing)
+      const drawings = p.getDrawings();
+      drawings.push(drawing);
+      p.setDrawings(drawings)
       p.setCaption(caption)
       const matchups = room.getMatchUps();
       matchups.push(new matchUp(prompt, drawing, caption, p));
@@ -186,10 +190,15 @@ export default class EventHandler {
       for (const matchUp of matchUps) {
         const challengerPlayer = room.getPlayerByUsername(username)
         if (matchUp.getChallengerPlayer()?.getUsername() === username) {
-          // If the champion player is found, check if there's no challenger yet
+          if (!matchUp.getChallengerPlayer() || !challengerPlayer) throw Errors.USER_NOT_DEFINED;
+
           matchUp.setChallengerPlayer(challengerPlayer);
           matchUp.setChallengerDrawing(drawing);
           matchUp.setChallengerCaption(caption);
+          // Add the drawing to challenger
+          const drawings = challengerPlayer.getDrawings();
+          drawings.push(drawing);
+          challengerPlayer.setDrawings(drawings)
           console.log(`Challenger set for ${username}`);
           break;
         }

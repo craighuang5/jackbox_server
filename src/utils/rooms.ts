@@ -113,7 +113,7 @@ export class Player {
   private verbs: string[];
   private prompt: string;
   private caption: string;
-  private drawing: string;
+  private drawings: string[];
   private socketId: string;
 
   // Constructor with default values for all attributes
@@ -125,7 +125,7 @@ export class Player {
     verbs: string[] = [],
     prompt: string = '',
     caption: string = '',
-    drawing: string = ''
+    drawings: string[] = [],
   ) {
     this.username = username;
     this.socketId = socketId;
@@ -134,7 +134,7 @@ export class Player {
     this.verbs = verbs;
     this.prompt = prompt;
     this.caption = caption;
-    this.drawing = drawing;
+    this.drawings = []
   }
 
   getUsername() {
@@ -185,23 +185,11 @@ export class Player {
     this.caption = caption;
   }
 
-  getDrawing() {
-    return this.drawing;
+  getDrawings() {
+    return this.drawings;
   }
 
-  setDrawing(drawing: string) {
-    this.drawing = drawing;
-  }
-
-  toJSON() {
-    return {
-      username: this.username,
-      score: this.score,
-      nouns: this.nouns,
-      verbs: this.verbs,
-      prompt: this.prompt,
-      caption: this.caption,
-      drawing: this.drawing,
-    };
+  setDrawings(drawings: string[]) {
+    this.drawings = drawings;
   }
 }

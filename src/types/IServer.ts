@@ -45,3 +45,9 @@ export interface IUpdateScoreboard {
     score: number;
   }[];
 }
+
+export interface IWinnerStart {
+  username: string;
+  drawings: string[];
+  score: number;
+}
