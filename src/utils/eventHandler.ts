@@ -135,7 +135,7 @@ export default class EventHandler {
     try {
       const { gameid, username, selectedNouns, selectedVerbs } = request;
       console.log('----------------------------------------------------------------------------------------------')
-      console.log(`Received selected words from ${username} for game ${gameid}:`, selectedNouns, selectedVerbs);
+      console.log(`Received selected words from ${username} for game ${gameid}:`, selectedNouns);
       // Store the words for the user
       const room = rooms.getRoom(request.gameid)
       if (!room) throw Errors.INVALID_GAMEID;
