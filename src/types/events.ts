@@ -14,7 +14,7 @@ let serverEvents = {
   "winnerStart": "winnerStart",
   // Emits that notify transition state change
   "promptRevealStart": "promptRevealStart",
-  "matchupRevealStart": "matchupRevealStart",
+  "championRevealStart": "championRevealStart",
   // Emits that send player information
   "sendPrompt": "sendPrompt",
   "sendMatchUp": "sendMatchup",

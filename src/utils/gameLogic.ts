@@ -29,6 +29,7 @@ class GameLogic {
       STATE_NAMES.wordSelect,
       STATE_NAMES.promptReveal,
       STATE_NAMES.createChampion,
+      STATE_NAMES.championReveal,
       STATE_NAMES.createChallenger,
       STATE_NAMES.vote,
       STATE_NAMES.score,
@@ -71,23 +72,16 @@ class GameLogic {
       this.startTimer(STATE_DURATIONS.createChampion);
     }
     else if (currentStateName === STATE_NAMES.createChallenger) {
-      const matchUps = this.room.getMatchUps();
-      matchUps.forEach((matchUp) => {
-        const challenger = matchUp.getChallengerPlayer();
-        if (challenger) {
-          this.io.to(challenger.getSocketId()).emit(serverEvents.sendMatchUp, {
-            'championDrawing': matchUp.getChampionDrawing(),
-            'championCaption': matchUp.getChampionCaption(),
-          } as IServer.ISendMatchup);
-          console.log(`Sent champion ${matchUp.getChampionPlayer().getUsername()} to ${matchUp.getChallengerPlayer()?.getUsername()}`)
-        }
-      });
       this.io.in(this.gameid).emit(serverEvents.createChallenger);
       this.startTimer(STATE_DURATIONS.createChallenger);
     }
     else if (currentStateName === STATE_NAMES.promptReveal) {
       this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
       this.startTimer(STATE_DURATIONS.promptReveal);
+    }
+    else if (currentStateName === STATE_NAMES.championReveal) {
+      this.io.in(this.gameid).emit(serverEvents.championRevealStart);
+      this.startTimer(STATE_DURATIONS.championReveal);
     }
     else if (currentStateName === STATE_NAMES.vote) {
       const matchUps = this.room.getMatchUps();
@@ -136,7 +130,8 @@ class GameLogic {
       await this.handleWordSelectEnd();
     }
     else if (currentStateName === STATE_NAMES.createChampion) {
-      await this.waitSeconds(5); // TODO: currently hard coded to wait for clients to send their champions. Dynamically code this to start after all champions are sent
+      this.io.in(this.gameid).emit(serverEvents.championRevealStart);
+      await this.waitSeconds(2); // TODO: currently hard coded to wait for clients to send their champions. Dynamically code this to start after all champions are sent
       const matchUps = this.room.getMatchUps()
       console.log('---------------------------------------------------------------------------------------------')
       matchUps.forEach((matchUp) => {
@@ -145,6 +140,16 @@ class GameLogic {
         console.log(`Champion: ${championPlayer}, Challenger: ${challengerPlayer}`);
       });
       this.assignOddChallengers()
+      matchUps.forEach((matchUp) => {
+        const challenger = matchUp.getChallengerPlayer();
+        if (challenger) {
+          this.io.to(challenger.getSocketId()).emit(serverEvents.sendMatchUp, {
+            'championDrawing': matchUp.getChampionDrawing(),
+            'championCaption': matchUp.getChampionCaption(),
+          } as IServer.ISendMatchup);
+          console.log(`Sent champion ${matchUp.getChampionPlayer().getUsername()} to ${matchUp.getChallengerPlayer()?.getUsername()}`)
+        }
+      });
     }
     else if (currentStateName === STATE_NAMES.createChallenger) {
       const matchUps = this.room.getMatchUps()
