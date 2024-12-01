@@ -87,6 +87,12 @@ class GameLogic {
     else if (currentStateName === STATE_NAMES.vote) {
       const matchUps = this.room.getMatchUps()
       const currentMatchUp = matchUps[this.currentMatchupNumber]
+
+      if (!currentMatchUp) {
+        console.error(`No matchup found for index ${this.currentMatchupNumber}`);
+        return;
+      }
+
       this.io.in(this.gameid).emit(serverEvents.updateVoteCount, {
         championPoints: currentMatchUp.getChampionPoints(),
         challengerPoints: currentMatchUp.getChallengerPoints(),
