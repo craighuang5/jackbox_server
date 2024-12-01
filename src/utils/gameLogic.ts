@@ -27,6 +27,7 @@ class GameLogic {
     this.currentState = 0;
     this.stateOrder = [
       STATE_NAMES.wordSelect,
+      STATE_NAMES.promptReveal,
       STATE_NAMES.createChampion,
       STATE_NAMES.createChallenger,
       STATE_NAMES.vote,
@@ -84,9 +85,13 @@ class GameLogic {
       this.io.in(this.gameid).emit(serverEvents.createChallenger);
       this.startTimer(STATE_DURATIONS.createChallenger);
     }
+    else if (currentStateName === STATE_NAMES.promptReveal) {
+      this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
+      this.startTimer(STATE_DURATIONS.promptReveal);
+    }
     else if (currentStateName === STATE_NAMES.vote) {
-      const matchUps = this.room.getMatchUps()
-      const currentMatchUp = matchUps[this.currentMatchupNumber]
+      const matchUps = this.room.getMatchUps();
+      const currentMatchUp = matchUps[this.currentMatchupNumber];
 
       if (!currentMatchUp) {
         console.error(`No matchup found for index ${this.currentMatchupNumber}`);
@@ -212,9 +217,6 @@ class GameLogic {
       console.log('---------------------------------------------------------------------------------------------')
       console.log(`Sent prompt to ${player.getUsername()}`)
     }
-
-    // Start the prompt reveal page after waiting
-    this.io.in(this.gameid).emit(serverEvents.promptRevealStart);
   }
 
   private assignEvenChallengers() {
