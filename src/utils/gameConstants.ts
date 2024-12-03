@@ -2,9 +2,9 @@ export const STATE_DURATIONS = {
   wordSelect: 1,
   promptReveal: 1,
   createChampion: 130,
-  championReveal: 10,
-  createChallenger: 130,
-  vote: 30,
+  championReveal: 1,
+  createChallenger: 1,
+  vote: 1,
 };
 
 export const STATE_NAMES = {
