@@ -36,6 +36,7 @@ app.post('/generate-prompt', async (req: Request, res: Response) => {
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
     res.status(500).send({ error: errorMessage });
+    res.send({ response: "Champion of cheese" });
   }
 });
 
