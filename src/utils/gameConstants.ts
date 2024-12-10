@@ -1,9 +1,9 @@
 export const STATE_DURATIONS = {
   wordSelect: 15,
   promptReveal: 5,
-  createChampion: 480,
+  createChampion: 60,
   championReveal: 5,
-  createChallenger: 480,
+  createChallenger: 60,
   vote: 10,
 };
 
